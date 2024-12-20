@@ -2,6 +2,7 @@ const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("node:path");
 const ExcelJS = require("exceljs");
 const { setMainMenu } = require("./menu.js");
+const { guardarCliente } = require("./guardarCliente.js");
 
 /* const crearExcel = async () => {
   const workbook = new ExcelJS.Workbook();
@@ -62,7 +63,7 @@ const readFile = async (excelFile) => {
       }
     });
 
-    return [clientData, clientTotals, clientTableData]
+    return [clientData, clientTotals, clientTableData];
   } else {
     console.log("No se encontró ninguna hoja en el archivo.");
   }
@@ -70,8 +71,36 @@ const readFile = async (excelFile) => {
 async function handleFileOpen() {
   const { canceled, filePaths } = await dialog.showOpenDialog();
   if (!canceled) {
-    console.log(await readFile(filePaths[0]));
-    return readFile(filePaths[0]);
+    const [clientData, clientTotals] = await readFile(filePaths[0]);
+    const nombre = clientData.CLIENTE;
+    const cedula = clientData.CEDULA;
+    const fecha_desembolso = clientData["FECHA DESEMBOLSO"];
+    const no_cuotas = clientData["NO. CUOTAS"];
+    const valor_desembolsado = clientData["VALOR DESEMBOLSADO"];
+    const pago = clientData.PAGO;
+    const tasa_usura_mes = clientData["TASA USURA MES"] * 100;
+    const total_libranza = clientData["total libranza "];
+    const liquidacion = clientData["liquidacion "];
+    const cuota = clientData.cuota;
+    const plazo = clientData.plazo;
+    const abono_int = clientTotals["abono int"];
+    const abono_capital = clientTotals["abono capital"];
+
+    const response = guardarCliente(
+      nombre,
+      cedula,
+      fecha_desembolso,
+      no_cuotas,
+      valor_desembolsado,
+      pago,
+      tasa_usura_mes,
+      total_libranza,
+      liquidacion,
+      cuota,
+      plazo,
+      abono_int,
+      abono_capital
+    );
   }
   return "no seleccionaste ningun archivo";
 }

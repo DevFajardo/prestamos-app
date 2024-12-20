@@ -1,5 +1,5 @@
 {
-  "name": "my-electron-app",
+  "name": "Prestamos-app",
   "version": "1.0.0",
   "main": "main.js",
   "scripts": {
@@ -13,6 +13,7 @@
     "electron": "^33.2.1"
   },
   "dependencies": {
-    "exceljs": "^4.4.0"
+    "exceljs": "^4.4.0",
+    "mysql2": "^3.11.5"
   }
 }
