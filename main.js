@@ -71,7 +71,19 @@ const readFile = async (excelFile) => {
 async function handleFileOpen() {
   const { canceled, filePaths } = await dialog.showOpenDialog();
   if (!canceled) {
-    const [clientData, clientTotals] = await readFile(filePaths[0]);
+    const [clientData, clientTotals, clientTableData] = await readFile(
+      filePaths[0]
+    );
+    const valueTable = clientTableData.map(
+      ({
+        periodo,
+        "saldo anterior": saldo_anterior,
+        "abono a intereses": abono_intereses,
+        "abono a capital": abono_capital,
+        "nuevo saldo": nuevo_saldo,
+      }) =>
+        `(${periodo}, ${saldo_anterior}, ${abono_intereses}, ${abono_capital}, ${nuevo_saldo}, ${clientData.CEDULA})`
+    );
     const nombre = clientData.CLIENTE;
     const cedula = clientData.CEDULA;
     const fecha_desembolso = clientData["FECHA DESEMBOLSO"];
@@ -99,7 +111,8 @@ async function handleFileOpen() {
       cuota,
       plazo,
       abono_int,
-      abono_capital
+      abono_capital,
+      valueTable
     );
   }
   return "no seleccionaste ningun archivo";
