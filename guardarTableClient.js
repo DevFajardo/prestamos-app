@@ -5,7 +5,7 @@ const showNotificacion = (title, body) => {
   new Notification({ title, body }).show();
 };
 
-const guardarTableClient = (valueTable, nombre) => {
+const guardarTableClient = (valueTable, nombre, cedula) => {
   const sql = `
       INSERT INTO tabla_clientes (periodo, saldo_anterior, abono_interes, abono_capital, nuevo_saldo, cedula_cliente)
       VALUES ${valueTable.join(", ")}
@@ -15,6 +15,15 @@ const guardarTableClient = (valueTable, nombre) => {
     if (err instanceof Error) {
       console.log("entro al error");
       console.log(err);
+      const sqlDel = `DELETE FROM clientes WHERE cedula = ${cedula};
+      `;
+      connection.query(sqlDel, function (err, result) {
+        if (err instanceof Error) {
+          console.log(
+            "error de borrar el cliente cuando hubo un error al registrar la tabla de prestamo"
+          );
+        }
+      });
       showNotificacion(
         "error",
         "Error al registrar la tabla prestamo del cliente ❌"

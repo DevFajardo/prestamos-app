@@ -43,11 +43,14 @@ const guardarCliente = (
   connection.query(sql, values, function (err, result) {
     if (err instanceof Error) {
       console.log("entro al error");
-      showNotificacion("error", "Error al registrar el cliente ❌");
+      showNotificacion(
+        "Error al registrar el cliente ❌",
+        "El excel esta mal o el registro ya esta creado"
+      );
       return;
     }
     console.log("salio succes guardar cliente");
-    guardarTableClient(valueTable, nombre);
+    guardarTableClient(valueTable, nombre, cedula);
   });
 };
 
