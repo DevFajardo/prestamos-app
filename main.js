@@ -3,6 +3,7 @@ const path = require("node:path");
 const ExcelJS = require("exceljs");
 const { setMainMenu } = require("./menu.js");
 const { guardarCliente } = require("./guardarCliente.js");
+const { buscarCliente } = require("./buscarCliente.js");
 
 /* const crearExcel = async () => {
   const workbook = new ExcelJS.Workbook();
@@ -17,6 +18,7 @@ const { guardarCliente } = require("./guardarCliente.js");
   await workbook.xlsx.writeFile('./sample2.xlsx');
 }
 crearExcel(); */
+let mainWindow;
 
 const readFile = async (excelFile) => {
   const workbook = new ExcelJS.Workbook();
@@ -117,17 +119,43 @@ async function handleFileOpen() {
   }
   return "no seleccionaste ningun archivo";
 }
+const rRegistrar = (file) => {
+  mainWindow.loadFile(file);
+};
+const rConsultar = (file) => {
+  mainWindow.loadFile(file);
+};
 
 function createWindow() {
-  const mainWindow = new BrowserWindow({
+  mainWindow = new BrowserWindow({
+    titleBarStyle: "hidden",
+    ...(process.platform !== "darwin"
+      ? {
+          titleBarOverlay: {
+            color: "rgb(39, 38, 46)",
+            symbolColor: "#74b1be",
+            height: 30,
+          },
+        }
+      : {}),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
+      nodeIntegration: true,
     },
   });
-  mainWindow.loadFile("index.html");
-}
+  ipcMain.on("searchCedula", (e, cedula) => {
+    buscarCliente(cedula);
+  });
+  ipcMain.on("registrar", (e, file) => {
+    rRegistrar(file);
+  });
+  ipcMain.on("consultar", (e, file) => {
+    rConsultar(file);
+  });
 
-setMainMenu();
+  mainWindow.loadFile("index.html");
+  setMainMenu(mainWindow);
+}
 
 app.whenReady().then(() => {
   ipcMain.handle("dialog:openFile", handleFileOpen);

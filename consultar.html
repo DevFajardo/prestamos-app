@@ -11,19 +11,18 @@
       content="default-src 'self'; script-src 'self'"
     />
     <link href="./styles.css" rel="stylesheet" />
-    <title>Prestamos - Cargar Excel</title>
+    <title>Prestamos - Consultar</title>
   </head>
   <body>
     <div class="titlebar">
-      <h1>Prestamos - Cargar Excel</h1>
+      <h1>Prestamos - Consultar Excel</h1>
       <ul>
         <li id="registrar">Registrar</li>
         <li id="consultar">Consultar</li>
       </ul>
     </div>
-    <button type="button" id="btn">Open a File</button>
-    File path:
-    <p id="filePath"></p>
-    <script src="./renderer.js"></script>
+    <input type="number" name="cedula" id="cedula" />
+    <button type="button" id="btnCedula">Buscar</button>
+    <script src="./consultar.js"></script>
   </body>
 </html>

@@ -1,10 +1,12 @@
-const btn = document.getElementById("btn");
-const filePathElement = document.getElementById("filePath");
+const btnCedula = document.getElementById("btnCedula");
+const inputCedula = document.getElementById("cedula");
 const registrar = document.getElementById("registrar");
 const consultar = document.getElementById("consultar");
 
-btn.addEventListener("click", async () => {
-  const filePath = await window.excelAPI.openFile();
+btnCedula.addEventListener("click", () => {
+  const cedula = inputCedula.value;
+  console.log(cedula);
+  window.excelAPI.searchCedula(cedula);
 });
 
 registrar.addEventListener("click", () => {
