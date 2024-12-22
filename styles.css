@@ -1,0 +1,28 @@
+body {
+  margin: 0;
+}
+.titlebar {
+  height: 30px;
+  background: rgb(39, 38, 46);
+  color: #74b1be;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  app-region: drag;
+  user-select: none;
+}
+
+.titlebar h1 {
+  font-size: medium;
+}
+
+.titlebar ul {
+  list-style: none;
+}
+
+#registrar,
+#consultar {
+  display: inline-block;
+  margin-left: 10px;
+  app-region: no-drag;
+}

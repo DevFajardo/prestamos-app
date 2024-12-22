@@ -1,6 +1,6 @@
-const { app, Menu } = require("electron");
+const { app, Menu, BrowserWindow } = require("electron");
 
-const setMainMenu = () => {
+const setMainMenu = (mainWindow) => {
   const template = [
     {
       id: "1",
@@ -10,14 +10,32 @@ const setMainMenu = () => {
       id: "2",
       label: "Registrar",
       submenu: [
-        { label: "cargar excel" },
-        { type: "separator" },
-        { label: "cargar manual" },
-
-        
+        {
+          label: "Cargar Excel",
+          click: async () => mainWindow.loadFile("index.html"),
+        },
+        { label: "Cargar Manual" },
+        {
+          label: "View",
+          submenu: [
+            { role: "reload" },
+            { role: "forceReload" },
+            { role: "toggleDevTools" },
+            { type: "separator" },
+            { role: "resetZoom" },
+            { role: "zoomIn" },
+            { role: "zoomOut" },
+            { type: "separator" },
+            { role: "togglefullscreen" },
+          ],
+        },
       ],
     },
-    { id: "3", label: "Consultar" },
+    {
+      id: "3",
+      label: "Consultar",
+      click: async () => mainWindow.loadFile("consultar.html"),
+    },
   ];
 
   const menu = Menu.buildFromTemplate(template);
