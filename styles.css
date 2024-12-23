@@ -2,16 +2,38 @@ body {
   margin: 0;
 }
 .titlebar {
+  display: flex;
   height: 30px;
   background: rgb(39, 38, 46);
   color: #74b1be;
+  justify-content: center;
+  align-items: center;
+  app-region: drag;
+  user-select: none;
+}
+.titlebarC{
+  position: fixed;
   display: flex;
+  width: 100%;
+  height: 30px;
+  background: rgb(39, 38, 46);
+  color: #74b1be;
   justify-content: center;
   align-items: center;
   app-region: drag;
   user-select: none;
 }
 
+.titlebarC h1 {
+  font-size: medium;
+}
+
+.titlebarC ul {
+  list-style: none;
+}
+.inputsContainer{
+  padding-top: 30px;
+}
 .titlebar h1 {
   font-size: medium;
 }
