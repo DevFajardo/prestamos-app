@@ -26,3 +26,23 @@ body {
   margin-left: 10px;
   app-region: no-drag;
 }
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin-top: 20px;
+}
+
+th,
+td {
+  border: 1px solid black;
+  text-align: center;
+  padding: 8px;
+}
+
+th {
+  background-color: #f2f2f2;
+}
+
+.negative {
+  color: red;
+}

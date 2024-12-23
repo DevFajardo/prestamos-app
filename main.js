@@ -143,9 +143,6 @@ function createWindow() {
       nodeIntegration: true,
     },
   });
-  ipcMain.on("searchCedula", (e, cedula) => {
-    buscarCliente(cedula);
-  });
   ipcMain.on("registrar", (e, file) => {
     rRegistrar(file);
   });
@@ -159,6 +156,10 @@ function createWindow() {
 
 app.whenReady().then(() => {
   ipcMain.handle("dialog:openFile", handleFileOpen);
+  ipcMain.handle("searchCedula", async (e, cedula) => {
+    const { dataClient, dataTable } = await buscarCliente(cedula);
+    return { dataClient, dataTable };
+  });
   createWindow();
   app.on("activate", function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

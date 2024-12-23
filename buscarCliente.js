@@ -38,30 +38,44 @@ const buscarCliente = async (cedula) => {
         tabla_clientes
       WHERE 
         cedula_cliente = ?`;
+  function ejecutarConsulta(sql, parametros) {
+    return new Promise((resolve, reject) => {
+      connection.execute(sql, parametros, (err, rows) => {
+        if (err) {
+          reject(err); // Rechaza la promesa con el error
+        } else {
+          resolve(rows); // Resuelve la promesa con los datos
+        }
+      });
+    });
+  }
 
-  connection.execute(sql, [cedula], (err, rows, fields) => {
-    if (err instanceof Error) {
-      console.log(err);
+  async function buscarCliente(cedula) {
+    try {
+      const rows = await ejecutarConsulta(sql, [cedula]);
+      showNotificacion("Busqueda completada ✔️", "SUCCES");
+      return rows;
+    } catch (error) {
+      console.error("Error al buscar la tabla cliente:", error);
       showNotificacion("Error al buscar el cliente ❌", "ERROR");
-      return;
     }
-    console.log("salio succes buscar cliente");
-    showNotificacion("Busqueda completada ✔️", "SUCCES");
-    console.log(rows);
-  });
+  }
 
-  connection.execute(sqlTable, [cedula], (err, rows, fields) => {
-    if (err instanceof Error) {
-      console.log(err);
+  async function buscarTablaCliente(cedula) {
+    try {
+      const rows = await ejecutarConsulta(sqlTable, [cedula]); 
+      showNotificacion("Búsqueda completada ✔️", "SUCCESS TABLE CLIENT");
+      return rows;
+    } catch (error) {
+      console.error("Error al buscar la tabla cliente:", error);
       showNotificacion("Error al buscar la tabla cliente ❌", "ERROR");
-      return;
     }
-    console.log("salio succes buscar tabla cliente");
-    showNotificacion("Busqueda completada ✔️", "SUCCES TABLE CLIENT");
-    console.log(rows);
-  });
-};
+  }
 
+  const dataTable = await buscarTablaCliente(cedula);
+  const dataClient = await buscarCliente(cedula);
+  return { dataClient, dataTable };
+};
 module.exports = {
   buscarCliente,
 };
