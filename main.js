@@ -84,7 +84,11 @@ async function handleFileOpen() {
         "abono a capital": abono_capital,
         "nuevo saldo": nuevo_saldo,
       }) =>
-        `(${periodo}, ${saldo_anterior}, ${abono_intereses}, ${abono_capital}, ${nuevo_saldo}, ${clientData.CEDULA})`
+        `(${periodo}, ${parseFloat(saldo_anterior.toFixed(2))}, ${parseFloat(
+          abono_intereses.toFixed(2)
+        )}, ${parseFloat(abono_capital.toFixed(2))}, ${parseFloat(
+          nuevo_saldo.toFixed(2)
+        )}, ${clientData.CEDULA})`
     );
     const nombre = clientData.CLIENTE;
     const cedula = clientData.CEDULA;
