@@ -4,6 +4,7 @@ const ExcelJS = require("exceljs");
 const { setMainMenu } = require("./menu.js");
 const { guardarCliente } = require("./guardarCliente.js");
 const { buscarCliente } = require("./buscarCliente.js");
+const { cambiarEstado } = require("./cambiarEstado.js");
 
 /* const crearExcel = async () => {
   const workbook = new ExcelJS.Workbook();
@@ -152,6 +153,9 @@ function createWindow() {
   });
   ipcMain.on("consultar", (e, file) => {
     rConsultar(file);
+  });
+  ipcMain.on("estado", (e, periodo, cedula) => {
+    cambiarEstado(periodo, cedula);
   });
 
   mainWindow.loadFile("index.html");
