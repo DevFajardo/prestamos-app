@@ -3,6 +3,9 @@ const inputCedula = document.getElementById("cedula");
 const registrar = document.getElementById("registrar");
 const consultar = document.getElementById("consultar");
 const tbody = document.querySelector("#tablaAmortizacion tbody");
+const modal = document.getElementById("myModal");
+const closeModalBtn = document.getElementById("closeModalBtn");
+const usersContent = document.getElementById("users-content");
 
 btnCedula.addEventListener("click", async () => {
   const accion = {
@@ -11,32 +14,54 @@ btnCedula.addEventListener("click", async () => {
   };
   const cedula = inputCedula.value;
   const { dataClient, dataTable } = await window.excelAPI.searchCedula(cedula);
-  await dataTable.forEach((dato) => {
-    const fila = document.createElement("tr");
-    fila.id = "fila" + dato.periodo;
+  if (dataClient.length > 1) {
+    modal.style.display = "block";
+    dataClient.forEach((cliente) => {
+      const card = document.createElement("div");
+      card.className = "card";
+      card.innerHTML = `
+        <h3>${cliente.nombre}</h3>
+        <p><strong>Libranza:</strong> ${cliente.codigo_libranza}</p>
+      `;
+      card.onclick = () => {
+        alert(`Has seleccionado al cliente: ${cliente.nombre} libranza ${cliente.codigo_libranza}`);
+      };
+      usersContent.appendChild(card);
+    });
+  } else {
+    await dataTable.forEach((dato) => {
+      const fila = document.createElement("tr");
+      fila.id = "fila" + dato.periodo;
 
-    if (dato.estado == 0) {
-      fila.innerHTML = `
-    <td>${dato.periodo}</td>
-    <td>${dato.saldo_anterior}</td>
-    <td class="negative">${dato.abono_interes}</td>
-    <td class="negative">${dato.abono_capital}</td>
-    <td>${dato.nuevo_saldo}</td>
-    <td><input class="inputs" value="✔️" id="${dato.periodo}" type=button></td>
-    `;
-    } else {
-      fila.innerHTML = `
+      if (dato.estado == 0) {
+        fila.innerHTML = `
       <td>${dato.periodo}</td>
       <td>${dato.saldo_anterior}</td>
       <td class="negative">${dato.abono_interes}</td>
       <td class="negative">${dato.abono_capital}</td>
       <td>${dato.nuevo_saldo}</td>
-      <td><input class="inputs" value="❌"  id="${dato.periodo}" type=button ></td>
-       `;
-      fila.style.backgroundColor = "green";
-    }
-    tbody.appendChild(fila);
-  });
+      <td><input class="inputs" value="✔️" id="${dato.periodo}" type=button></td>
+      `;
+      } else {
+        fila.innerHTML = `
+        <td>${dato.periodo}</td>
+        <td>${dato.saldo_anterior}</td>
+        <td class="negative">${dato.abono_interes}</td>
+        <td class="negative">${dato.abono_capital}</td>
+        <td>${dato.nuevo_saldo}</td>
+        <td><input class="inputs" value="❌"  id="${dato.periodo}" type=button ></td>
+         `;
+        fila.style.backgroundColor = "green";
+      }
+      tbody.appendChild(fila);
+    });
+  }
+
+  closeModalBtn.onclick = function () {
+    modal.style.display = "none";
+    usersContent.innerHTML = "";
+  };
+
   const buttons = document.querySelectorAll(".inputs");
   buttons.forEach((button) => {
     button.addEventListener("click", (event) => {
