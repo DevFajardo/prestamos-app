@@ -7,6 +7,7 @@ const showNotificacion = (title, body) => {
 };
 
 const guardarCliente = (
+  libranza,
   nombre,
   cedula,
   fecha_desembolso,
@@ -23,8 +24,9 @@ const guardarCliente = (
   valueTable
 ) => {
   const sql =
-    "INSERT INTO `clientes` (nombre, cedula, fecha_desembolso, no_cuotas, valor_desembolsado,pago,tasa_usura_mes,total_libranza,liquidacion,cuota,plazo,abono_int,abono_capital) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?)";
+    "INSERT INTO `clientes` (codigo_libranza, nombre ,cedula, fecha_desembolso, no_cuotas, valor_desembolsado,pago,tasa_usura_mes,total_libranza,liquidacion,cuota,plazo,abono_int,abono_capital) VALUES (?,?,?,?,?,?,?,?,?,?,?,?,?,?)";
   const values = [
+    libranza,
     nombre,
     cedula,
     fecha_desembolso,
@@ -43,6 +45,7 @@ const guardarCliente = (
   connection.query(sql, values, function (err, result) {
     if (err instanceof Error) {
       console.log("entro al error");
+      console.log(err)
       showNotificacion(
         "Error al registrar el cliente ❌",
         "El excel esta mal o el registro ya esta creado"
@@ -50,7 +53,7 @@ const guardarCliente = (
       return;
     }
     console.log("salio succes guardar cliente");
-    guardarTableClient(valueTable, nombre, cedula);
+    guardarTableClient(valueTable, nombre, libranza);
   });
 };
 

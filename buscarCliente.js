@@ -5,9 +5,11 @@ const showNotificacion = (title, body) => {
   new Notification({ title, body }).show();
 };
 
-const buscarCliente = async (cedula) => {
+
+const buscarCliente = async (cedula, libranza) => {
   const sql = `SELECT 
     id AS cliente_id,
+    codigo_libranza,
     nombre,
     cedula,
     fecha_desembolso,
@@ -37,7 +39,7 @@ const buscarCliente = async (cedula) => {
       FROM 
         tabla_clientes
       WHERE 
-        cedula_cliente = ?`;
+        codigo_libranza = ?`;
   function ejecutarConsulta(sql, parametros) {
     return new Promise((resolve, reject) => {
       connection.execute(sql, parametros, (err, rows) => {
@@ -50,10 +52,11 @@ const buscarCliente = async (cedula) => {
     });
   }
 
-  async function buscarCliente(cedula) {
+  async function buscardatoCliente(cedula) {
     try {
       const rows = await ejecutarConsulta(sql, [cedula]);
       showNotificacion("Busqueda completada ✔️", "SUCCES");
+      libranza = rows.map((obj) => obj.codigo_libranza)[0];
       return rows;
     } catch (error) {
       console.error("Error al buscar la tabla cliente:", error);
@@ -61,9 +64,9 @@ const buscarCliente = async (cedula) => {
     }
   }
 
-  async function buscarTablaCliente(cedula) {
+  async function buscarTablaCliente(libranza) {
     try {
-      const rows = await ejecutarConsulta(sqlTable, [cedula]);
+      const rows = await ejecutarConsulta(sqlTable, [libranza]);
       const formatearNumeros = (array) => {
         return array.map((obj) => {
           const formateado = { ...obj };
@@ -95,8 +98,8 @@ const buscarCliente = async (cedula) => {
     }
   }
 
-  const dataTable = await buscarTablaCliente(cedula);
-  const dataClient = await buscarCliente(cedula);
+  const dataClient = await buscardatoCliente(cedula);
+  const dataTable = await buscarTablaCliente(libranza);
   return { dataClient, dataTable };
 };
 module.exports = {

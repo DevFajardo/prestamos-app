@@ -5,9 +5,9 @@ const showNotificacion = (title, body) => {
   new Notification({ title, body }).show();
 };
 
-const guardarTableClient = (valueTable, nombre, cedula) => {
+const guardarTableClient = (valueTable, nombre, libranza) => {
   const sql = `
-      INSERT INTO tabla_clientes (periodo, saldo_anterior, abono_interes, abono_capital, nuevo_saldo, cedula_cliente)
+      INSERT INTO tabla_clientes (periodo, saldo_anterior, abono_interes, abono_capital, nuevo_saldo, codigo_libranza)
       VALUES ${valueTable.join(", ")}
     `;
 
@@ -15,7 +15,7 @@ const guardarTableClient = (valueTable, nombre, cedula) => {
     if (err instanceof Error) {
       console.log("entro al error");
       console.log(err);
-      const sqlDel = `DELETE FROM clientes WHERE cedula = ${cedula};
+      const sqlDel = `DELETE FROM clientes WHERE codigo_libranza = ${libranza};
       `;
       connection.query(sqlDel, function (err, result) {
         if (err instanceof Error) {
