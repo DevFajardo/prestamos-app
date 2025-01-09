@@ -34,6 +34,9 @@ const readFile = async (excelFile) => {
       clientData[row.values[1]] = row.values[2].result
         ? row.values[2].result
         : row.values[2];
+      if (row.values[3]) {
+        clientData["LIBRANZA"] = row.values[3];
+      }
     });
     secondSheet.eachRow(async (row, rowNumber) => {
       if (rowNumber == 9) {
@@ -61,11 +64,11 @@ const readFile = async (excelFile) => {
           "nuevo saldo": row.values[6].result
             ? row.values[6].result
             : row.values[6],
+          codigo_libranza: clientData.LIBRANZA,
         };
         clientTableData.push(json);
       }
     });
-
     return [clientData, clientTotals, clientTableData];
   } else {
     console.log("No se encontró ninguna hoja en el archivo.");
@@ -84,13 +87,15 @@ async function handleFileOpen() {
         "abono a intereses": abono_intereses,
         "abono a capital": abono_capital,
         "nuevo saldo": nuevo_saldo,
+        codigo_libranza,
       }) =>
         `(${periodo}, ${parseFloat(saldo_anterior.toFixed(2))}, ${parseFloat(
           abono_intereses.toFixed(2)
         )}, ${parseFloat(abono_capital.toFixed(2))}, ${parseFloat(
           nuevo_saldo.toFixed(2)
-        )}, ${clientData.CEDULA})`
+        )}, ${codigo_libranza})`
     );
+    const libranza = clientData.LIBRANZA;
     const nombre = clientData.CLIENTE;
     const cedula = clientData.CEDULA;
     const fecha_desembolso = clientData["FECHA DESEMBOLSO"];
@@ -104,8 +109,8 @@ async function handleFileOpen() {
     const plazo = clientData.plazo;
     const abono_int = clientTotals["abono int"];
     const abono_capital = clientTotals["abono capital"];
-
     const response = guardarCliente(
+      libranza,
       nombre,
       cedula,
       fecha_desembolso,
@@ -123,6 +128,13 @@ async function handleFileOpen() {
     );
   }
   return "no seleccionaste ningun archivo";
+}
+async function handleSearchClient(e, cedula) {
+  const { dataClient, dataTable } = await buscarCliente(cedula);
+  return { dataClient, dataTable };
+}
+async function handleCambiarEstado(e, periodo, libranza, accion) {
+  cambiarEstado(periodo, libranza, accion);
 }
 const rRegistrar = (file) => {
   mainWindow.loadFile(file);
@@ -154,9 +166,7 @@ function createWindow() {
   ipcMain.on("consultar", (e, file) => {
     rConsultar(file);
   });
-  ipcMain.on("estado", (e, periodo, cedula) => {
-    cambiarEstado(periodo, cedula);
-  });
+  ipcMain.on("estado", handleCambiarEstado);
 
   mainWindow.loadFile("index.html");
   setMainMenu(mainWindow);
@@ -164,10 +174,7 @@ function createWindow() {
 
 app.whenReady().then(() => {
   ipcMain.handle("dialog:openFile", handleFileOpen);
-  ipcMain.handle("searchCedula", async (e, cedula) => {
-    const { dataClient, dataTable } = await buscarCliente(cedula);
-    return { dataClient, dataTable };
-  });
+  ipcMain.handle("searchCedula", handleSearchClient);
   createWindow();
   app.on("activate", function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();

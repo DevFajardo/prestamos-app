@@ -5,9 +5,12 @@ const consultar = document.getElementById("consultar");
 const tbody = document.querySelector("#tablaAmortizacion tbody");
 
 btnCedula.addEventListener("click", async () => {
+  const accion = {
+    confirmar: 1,
+    revertir: 2,
+  };
   const cedula = inputCedula.value;
   const { dataClient, dataTable } = await window.excelAPI.searchCedula(cedula);
-
   await dataTable.forEach((dato) => {
     const fila = document.createElement("tr");
     fila.id = "fila" + dato.periodo;
@@ -19,7 +22,7 @@ btnCedula.addEventListener("click", async () => {
     <td class="negative">${dato.abono_interes}</td>
     <td class="negative">${dato.abono_capital}</td>
     <td>${dato.nuevo_saldo}</td>
-    <td><input class="inputEstado" value="✔️" id="${dato.periodo}" type=button></td>
+    <td><input class="inputs" value="✔️" id="${dato.periodo}" type=button></td>
     `;
     } else {
       fila.innerHTML = `
@@ -28,20 +31,38 @@ btnCedula.addEventListener("click", async () => {
       <td class="negative">${dato.abono_interes}</td>
       <td class="negative">${dato.abono_capital}</td>
       <td>${dato.nuevo_saldo}</td>
-      <td><input class="inputEstado" value="✔️" id="${dato.periodo}" type=button disabled></td>
+      <td><input class="inputs" value="❌"  id="${dato.periodo}" type=button ></td>
        `;
       fila.style.backgroundColor = "green";
     }
     tbody.appendChild(fila);
   });
-  const buttons = document.querySelectorAll(".inputEstado");
+  const buttons = document.querySelectorAll(".inputs");
   buttons.forEach((button) => {
     button.addEventListener("click", (event) => {
-      console.log(`Se marcó el checkbox con valor: ${event.target.id}`);
-      const filaPresionada = document.getElementById("fila" + event.target.id);
-      filaPresionada.style.backgroundColor = "green";
-      button.disabled = true;
-      window.excelAPI.cambiarEstado(event.target.id, cedula);
+      if (button.value == "❌") {
+        const filaPresionada = document.getElementById(
+          "fila" + event.target.id
+        );
+        filaPresionada.style.backgroundColor = "white";
+        button.value = "✔️";
+        window.excelAPI.cambiarEstado(
+          event.target.id,
+          dataClient[0].codigo_libranza,
+          accion.revertir
+        );
+      } else {
+        const filaPresionada = document.getElementById(
+          "fila" + event.target.id
+        );
+        filaPresionada.style.backgroundColor = "green";
+        button.value = "❌";
+        window.excelAPI.cambiarEstado(
+          event.target.id,
+          dataClient[0].codigo_libranza,
+          accion.confirmar
+        );
+      }
     });
   });
 });

@@ -5,6 +5,6 @@ contextBridge.exposeInMainWorld("excelAPI", {
   searchCedula: (cedula) => ipcRenderer.invoke("searchCedula", cedula),
   registrar: (file) => ipcRenderer.send("registrar", file),
   consultar: (file) => ipcRenderer.send("consultar", file),
-  cambiarEstado: (periodo, cedula) =>
-    ipcRenderer.send("estado", periodo, cedula),
+  cambiarEstado: (periodo, libranza, accion) =>
+    ipcRenderer.send("estado", periodo, libranza, accion),
 });
