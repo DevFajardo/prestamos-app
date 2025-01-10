@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+    <meta
+      http-equiv="X-Content-Security-Policy"
+      content="default-src 'self'; script-src 'self'"
+    />
+    <link href="../css/styles.css" rel="stylesheet" />
+    <title>Prestamos - Consultar</title>
+  </head>
+  <body>
+    <div id="myModal" class="modal">
+      <div class="modal-content">
+        <span class="close" id="closeModalBtn">&times;</span>
+        <h3>Elige cual prestamo buscas</h3>
+        <div id="users-content"></div>
+      </div>
+    </div>
+
+    <div class="titlebarC">
+      <h1>Prestamos - Consultar Excel</h1>
+      <ul>
+        <li id="registrar">Registrar</li>
+        <li id="consultar">Consultar</li>
+      </ul>
+    </div>
+    <div class="inputsContainer">
+      <input type="number" name="cedula" id="cedula" />
+      <button type="button" id="btnCedula">Buscar</button>
+    </div>
+    <div id="infoUserContainer"></div>
+    <table id="tablaAmortizacion">
+      <thead>
+        <tr>
+          <th>Periodo</th>
+          <th>Saldo Anterior</th>
+          <th>Abono a Interés</th>
+          <th>Abono a Capital</th>
+          <th>Nuevo Saldo</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <script src="../js/consultar.js"></script>
+  </body>
+</html>
