@@ -1,10 +1,10 @@
 const { app, BrowserWindow, ipcMain, dialog } = require("electron");
 const path = require("node:path");
 const ExcelJS = require("exceljs");
-const { setMainMenu } = require("./menu.js");
-const { guardarCliente } = require("./guardarCliente.js");
-const { buscarCliente } = require("./buscarCliente.js");
-const { cambiarEstado } = require("./cambiarEstado.js");
+/* const { setMainMenu } = require("./js/menu.js"); */
+const { guardarCliente } = require("./js/guardarCliente.js");
+const { buscarCliente } = require("./js/buscarCliente.js");
+const { cambiarEstado } = require("./js/cambiarEstado.js");
 
 /* const crearExcel = async () => {
   const workbook = new ExcelJS.Workbook();
@@ -129,8 +129,11 @@ async function handleFileOpen() {
   }
   return "no seleccionaste ningun archivo";
 }
-async function handleSearchClient(e, cedula) {
-  const { dataClient, dataTable } = await buscarCliente(cedula);
+async function handleSearchClient(e, cedula, libranzaEscojida) {
+  const { dataClient, dataTable } = await buscarCliente(
+    cedula,
+    libranzaEscojida
+  );
   return { dataClient, dataTable };
 }
 async function handleCambiarEstado(e, periodo, libranza, accion) {
@@ -156,7 +159,7 @@ function createWindow() {
         }
       : {}),
     webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
+      preload: path.join(__dirname, "./js/preload.js"),
       nodeIntegration: true,
     },
   });
@@ -168,8 +171,8 @@ function createWindow() {
   });
   ipcMain.on("estado", handleCambiarEstado);
 
-  mainWindow.loadFile("index.html");
-  setMainMenu(mainWindow);
+  mainWindow.loadFile("./html/index.html");
+  /* setMainMenu(mainWindow); */
 }
 
 app.whenReady().then(() => {
