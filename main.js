@@ -152,9 +152,9 @@ function createWindow() {
     ...(process.platform !== "darwin"
       ? {
           titleBarOverlay: {
-            color: "rgb(39, 38, 46)",
-            symbolColor: "#74b1be",
-            height: 30,
+            color: "rgba(255, 255, 255, 1)",
+            symbolColor: "black",
+            height: 59,
           },
         }
       : {}),

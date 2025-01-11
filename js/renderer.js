@@ -1,4 +1,4 @@
-const btn = document.getElementById("btn");
+const btn = document.getElementById("file");
 const filePathElement = document.getElementById("filePath");
 const registrar = document.getElementById("registrar");
 const consultar = document.getElementById("consultar");
