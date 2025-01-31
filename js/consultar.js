@@ -1,6 +1,7 @@
 const inputCedula = document.getElementById("cedula");
 const registrar = document.getElementById("registrar");
 const consultar = document.getElementById("consultar");
+const debitos = document.getElementById("debitos");
 const tbody = document.querySelector("#tablaAmortizacion tbody");
 const modal = document.getElementById("myModal");
 const closeModalBtn = document.getElementById("closeModalBtn");
@@ -169,9 +170,13 @@ inputCedula.addEventListener("keydown", async (e) => {
 });
 
 registrar.addEventListener("click", () => {
-  window.excelAPI.registrar("./html/index.html");
+  window.excelAPI.cambiarRuta("./html/index.html");
 });
 
 consultar.addEventListener("click", () => {
-  window.excelAPI.consultar("./html/consultar.html");
+  window.excelAPI.cambiarRuta("./html/consultar.html");
+});
+
+debitos.addEventListener("click", () => {
+  window.excelAPI.cambiarRuta("./html/debitos.html");
 });
