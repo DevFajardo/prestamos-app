@@ -139,10 +139,7 @@ async function handleSearchClient(e, cedula, libranzaEscojida) {
 async function handleCambiarEstado(e, periodo, libranza, accion) {
   cambiarEstado(periodo, libranza, accion);
 }
-const rRegistrar = (file) => {
-  mainWindow.loadFile(file);
-};
-const rConsultar = (file) => {
+const handleCambiarRuta = (file) => {
   mainWindow.loadFile(file);
 };
 
@@ -163,11 +160,8 @@ function createWindow() {
       nodeIntegration: true,
     },
   });
-  ipcMain.on("registrar", (e, file) => {
-    rRegistrar(file);
-  });
-  ipcMain.on("consultar", (e, file) => {
-    rConsultar(file);
+  ipcMain.on("cambiarRuta", (e, file) => {
+    handleCambiarRuta(file);
   });
   ipcMain.on("estado", handleCambiarEstado);
 
