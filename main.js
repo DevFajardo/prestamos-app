@@ -149,40 +149,68 @@ async function handleRellenarPlantilla() {
       };
       clientData.push(json);
     });
-    console.log(clientData);
     clientData.map(async (clientExcel) => {
       try {
         const { dataClient, dataTable } = await buscarCliente(
           clientExcel.cedula,
           clientExcel.libranza
         );
-        console.log(dataTable);
+        if (dataClient.length == 0) {
+          const json = {
+            row: clientExcel.row,
+            cedula: clientExcel.cedula,
+            libranza: clientExcel.libranza,
+            interes: null,
+            capital: null,
+            igualdad: null,
+            comentario: "No se encontro el cliente",
+          };
+          fillData.push(json);
+        }
         dataClient.map((client) => {
           if (client.codigo_libranza == clientExcel.libranza) {
-            console.log("si es igual la libranza");
-            const json = {
+            const jsonFill = {
               row: clientExcel.row,
               cedula: client.cedula,
               libranza: client.codigo_libranza,
-              interes: client.abono_int,
-              capital: client.abono_capital,
             };
-            fillData.push(json);
+            for (let i = 0; i <= parseInt(dataClient[0].no_cuotas); i++) {
+              if (dataTable[i].estado == 0) {
+                jsonFill.interes = Math.abs(
+                  Math.floor(parseFloat(dataTable[i].abono_interes))
+                );
+                jsonFill.capital = Math.abs(
+                  parseInt(dataTable[i].abono_capital)
+                );
+                jsonFill.suma = Math.abs(
+                  parseFloat(dataTable[i].abono_interes) +
+                    parseFloat(dataTable[i].abono_capital)
+                );
+                jsonFill.cuota = clientExcel.cuota;
+                jsonFill.comentario =
+                  jsonFill.suma == jsonFill.cuota ? true : false;
+                i = parseInt(dataClient[0].no_cuotas);
+              }
+            }
+            fillData.push(jsonFill);
             console.log("fillData", fillData);
           } else {
             console.log("no es igual la libranza");
+            const json = {
+              row: clientExcel.row,
+              cedula: clientExcel.cedula,
+              libranza: clientExcel.libranza,
+              interes: null,
+              capital: null,
+              igualdad: null,
+              comentario: "No se encontro la libranza",
+            };
+            fillData.push(json);
+            console.log(fillData);
           }
         });
       } catch (error) {
-        console.log("no se encontro el cliente");
-        const json = {
-          row: clientExcel.row,
-          cedula: clientExcel.cedula,
-          libranza: clientExcel.libranza,
-          interes: null,
-          capital: null,
-        };
-        fillData.push(json);
+        console.log("error: ", error);
       }
     });
   }

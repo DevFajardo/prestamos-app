@@ -70,7 +70,7 @@ const buscarCliente = async (cedula, libranzaEscojida) => {
       libranza = rows.map((obj) => obj.codigo_libranza)[0];
       return rows;
     } catch (error) {
-      console.error("Error al buscar la tabla cliente:", error);
+      console.error("Error al buscar los datos del cliente:", error);
       showNotificacion("Error al buscar el cliente ❌", "ERROR");
     }
   }
@@ -78,34 +78,9 @@ const buscarCliente = async (cedula, libranzaEscojida) => {
   //funcion para buscar la tabla de prestamos del cliente buscado por medio de la libranza guardada en la funcion anterior
   async function buscarTablaCliente(libranza) {
     try {
-      //se ejecuta la consulta
       const rows = await ejecutarConsulta(sqlTable, [libranza]);
-      //formateo de numeros con solo 2 digitos despues de la coma
-      const formatearNumeros = (array) => {
-        return array.map((obj) => {
-          const formateado = { ...obj };
-          formateado.saldo_anterior = formateado.saldo_anterior.toLocaleString(
-            "es-ES",
-            { minimumFractionDigits: 2 }
-          );
-          formateado.abono_interes = formateado.abono_interes.toLocaleString(
-            "es-ES",
-            { minimumFractionDigits: 2 }
-          );
-          formateado.abono_capital = formateado.abono_capital.toLocaleString(
-            "es-ES",
-            { minimumFractionDigits: 2 }
-          );
-          formateado.nuevo_saldo = formateado.nuevo_saldo.toLocaleString(
-            "es-ES",
-            { minimumFractionDigits: 2 }
-          );
-          return formateado;
-        });
-      };
-      const datosFormateados = formatearNumeros(rows);
       showNotificacion("Búsqueda completada ✔️", "SUCCESS TABLE CLIENT");
-      return datosFormateados;
+      return rows;
     } catch (error) {
       console.error("Error al buscar la tabla cliente:", error);
       showNotificacion("Error al buscar la tabla cliente ❌", "ERROR");
