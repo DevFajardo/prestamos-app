@@ -129,6 +129,66 @@ async function handleFileOpen() {
   }
   return "no seleccionaste ningun archivo";
 }
+
+async function handleRellenarPlantilla() {
+  const { canceled, filePaths } = await dialog.showOpenDialog();
+  let clientData = [];
+  let fillData = [];
+  if (!canceled) {
+    const workbook = new ExcelJS.Workbook();
+    await workbook.xlsx.readFile(filePaths[0]);
+    const firstSheet = workbook.worksheets[0];
+    firstSheet.eachRow(async (row, rowNumber) => {
+      if (rowNumber == 1) return;
+      if (row.values[1] == null) return;
+      const json = {
+        row: rowNumber,
+        cedula: row.values[1],
+        libranza: row.values[3],
+        cuota: row.values[11],
+      };
+      clientData.push(json);
+    });
+    console.log(clientData);
+    clientData.map(async (clientExcel) => {
+      try {
+        const { dataClient, dataTable } = await buscarCliente(
+          clientExcel.cedula,
+          clientExcel.libranza
+        );
+        console.log(dataTable);
+        dataClient.map((client) => {
+          if (client.codigo_libranza == clientExcel.libranza) {
+            console.log("si es igual la libranza");
+            const json = {
+              row: clientExcel.row,
+              cedula: client.cedula,
+              libranza: client.codigo_libranza,
+              interes: client.abono_int,
+              capital: client.abono_capital,
+            };
+            fillData.push(json);
+            console.log("fillData", fillData);
+          } else {
+            console.log("no es igual la libranza");
+          }
+        });
+      } catch (error) {
+        console.log("no se encontro el cliente");
+        const json = {
+          row: clientExcel.row,
+          cedula: clientExcel.cedula,
+          libranza: clientExcel.libranza,
+          interes: null,
+          capital: null,
+        };
+        fillData.push(json);
+      }
+    });
+  }
+  return fillData;
+}
+
 async function handleSearchClient(e, cedula, libranzaEscojida) {
   const { dataClient, dataTable } = await buscarCliente(
     cedula,
@@ -171,6 +231,9 @@ function createWindow() {
 
 app.whenReady().then(() => {
   ipcMain.handle("dialog:openFile", handleFileOpen);
+  ipcMain.handle("dialog:rellenarPlantilla", async () => {
+    const fillData = await handleRellenarPlantilla();
+  });
   ipcMain.handle("searchCedula", handleSearchClient);
   createWindow();
   app.on("activate", function () {

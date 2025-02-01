@@ -39,7 +39,8 @@ const buscarCliente = async (cedula, libranzaEscojida) => {
         abono_interes,
         abono_capital,
         nuevo_saldo,
-        estado
+        estado,
+        codigo_libranza
       FROM 
         tabla_clientes
       WHERE 
