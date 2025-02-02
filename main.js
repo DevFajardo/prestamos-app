@@ -6,19 +6,6 @@ const { guardarCliente } = require("./js/guardarCliente.js");
 const { buscarCliente } = require("./js/buscarCliente.js");
 const { cambiarEstado } = require("./js/cambiarEstado.js");
 
-/* const crearExcel = async () => {
-  const workbook = new ExcelJS.Workbook();
-  const worksheet = workbook.addWorksheet('MySheet');
-  worksheet.columns = [
-    { header: 'Id', key: 'id', width: 10 },
-    { header: 'Name', key: 'name', width: 32 },
-    { header: 'D.O.B.', key: 'DOB', width: 10, outlineLevel: 1 }
-  ];
-  worksheet.addRow({ id: 1, name: 'John Doe', DOB: new Date(1970, 1, 1) });
-  worksheet.addRow({ id: 2, name: 'Jane Doe', DOB: new Date(1965, 1, 7) });
-  await workbook.xlsx.writeFile('./sample2.xlsx');
-}
-crearExcel(); */
 let mainWindow;
 
 const readFile = async (excelFile) => {
@@ -131,9 +118,8 @@ async function handleFileOpen() {
 }
 
 async function handleRellenarPlantilla() {
+  console.time("tiempo");
   const { canceled, filePaths } = await dialog.showOpenDialog();
-  let clientData = [];
-  let fillData = [];
   if (!canceled) {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePaths[0]);
@@ -141,80 +127,92 @@ async function handleRellenarPlantilla() {
     firstSheet.eachRow(async (row, rowNumber) => {
       if (rowNumber == 1) return;
       if (row.values[1] == null) return;
-      const json = {
+      const clientExcel = {
         row: rowNumber,
         cedula: row.values[1],
         libranza: row.values[3],
         cuota: row.values[11],
       };
-      clientData.push(json);
-    });
-    clientData.map(async (clientExcel) => {
       try {
         const { dataClient, dataTable } = await buscarCliente(
           clientExcel.cedula,
           clientExcel.libranza
         );
+        let fallo = 0;
         if (dataClient.length == 0) {
-          const json = {
-            row: clientExcel.row,
-            cedula: clientExcel.cedula,
-            libranza: clientExcel.libranza,
-            interes: null,
-            capital: null,
-            igualdad: null,
-            comentario: "No se encontro el cliente",
+          const cellL = firstSheet.getCell("L" + clientExcel.row); //celda de interes
+          const cellM = firstSheet.getCell("M" + clientExcel.row); //celda de capital
+          cellL.value = "?";
+          cellM.value = "?";
+          cellL.font = {
+            color: { argb: "FF0000" }, // Rojo
+            bold: true, // Opcional: poner en negrita
           };
-          fillData.push(json);
+          cellM.font = {
+            color: { argb: "FF0000" }, // Rojo
+            bold: true, // Opcional: poner en negrita
+          };
+
+          await workbook.xlsx.writeFile("archivo.xlsx");
         }
-        dataClient.map((client) => {
-          if (client.codigo_libranza == clientExcel.libranza) {
-            const jsonFill = {
-              row: clientExcel.row,
-              cedula: client.cedula,
-              libranza: client.codigo_libranza,
-            };
+        for (let i = 0; i < dataClient.length; i++) {
+          const client = dataClient[i];
+          if (clientExcel.libranza == client.codigo_libranza) {
+            fallo = 0;
+            const cellL = firstSheet.getCell("L" + clientExcel.row); //celda de interes
+            const cellM = firstSheet.getCell("M" + clientExcel.row); //celda de capital
+
             for (let i = 0; i <= parseInt(dataClient[0].no_cuotas); i++) {
               if (dataTable[i].estado == 0) {
-                jsonFill.interes = Math.abs(
+                cellL.value = Math.abs(
                   Math.floor(parseFloat(dataTable[i].abono_interes))
                 );
-                jsonFill.capital = Math.abs(
-                  parseInt(dataTable[i].abono_capital)
-                );
-                jsonFill.suma = Math.abs(
-                  parseFloat(dataTable[i].abono_interes) +
-                    parseFloat(dataTable[i].abono_capital)
-                );
-                jsonFill.cuota = clientExcel.cuota;
-                jsonFill.comentario =
-                  jsonFill.suma == jsonFill.cuota ? true : false;
+                cellM.value = Math.abs(parseInt(dataTable[i].abono_capital));
                 i = parseInt(dataClient[0].no_cuotas);
               }
             }
-            fillData.push(jsonFill);
-            console.log("fillData", fillData);
+            cellL.font =
+              cellL.value + cellM.value == clientExcel.cuota
+                ? ""
+                : {
+                    color: { argb: "FF0000" }, // Rojo
+                    bold: true, // Opcional: poner en negrita
+                  };
+            cellM.font =
+              cellL.value + cellM.value == clientExcel.cuota
+                ? ""
+                : {
+                    color: { argb: "FF0000" }, // Rojo
+                    bold: true, // Opcional: poner en negrita
+                  };
+
+            await workbook.xlsx.writeFile("archivo.xlsx");
           } else {
-            console.log("no es igual la libranza");
-            const json = {
-              row: clientExcel.row,
-              cedula: clientExcel.cedula,
-              libranza: clientExcel.libranza,
-              interes: null,
-              capital: null,
-              igualdad: null,
-              comentario: "No se encontro la libranza",
-            };
-            fillData.push(json);
-            console.log(fillData);
+            fallo++;
+            if (fallo == dataClient.length) {
+              const cellL = firstSheet.getCell("L" + clientExcel.row); //celda de interes
+              const cellM = firstSheet.getCell("M" + clientExcel.row); //celda de capital
+              cellL.value = "L";
+              cellM.value = "L";
+              cellL.font = {
+                color: { argb: "FF0000" }, // Rojo
+                bold: true, // Opcional: poner en negrita
+              };
+              cellM.font = {
+                color: { argb: "FF0000" }, // Rojo
+                bold: true, // Opcional: poner en negrita
+              };
+              await workbook.xlsx.writeFile("archivo.xlsx");
+            }
           }
-        });
+        }
       } catch (error) {
         console.log("error: ", error);
       }
+      await workbook.xlsx.writeFile("archivo.xlsx");
     });
   }
-  return fillData;
+  console.timeEnd("tiempo");
 }
 
 async function handleSearchClient(e, cedula, libranzaEscojida) {
