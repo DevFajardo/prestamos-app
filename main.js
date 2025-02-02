@@ -118,7 +118,6 @@ async function handleFileOpen() {
 }
 
 async function handleRellenarPlantilla() {
-  console.time("tiempo");
   const { canceled, filePaths } = await dialog.showOpenDialog();
   if (!canceled) {
     const workbook = new ExcelJS.Workbook();
@@ -152,7 +151,7 @@ async function handleRellenarPlantilla() {
             color: { argb: "FF0000" }, // Rojo
             bold: true, // Opcional: poner en negrita
           };
-
+          console.log("no se encontro el cliente");
           await workbook.xlsx.writeFile("archivo.xlsx");
         }
         for (let i = 0; i < dataClient.length; i++) {
@@ -185,7 +184,7 @@ async function handleRellenarPlantilla() {
                     color: { argb: "FF0000" }, // Rojo
                     bold: true, // Opcional: poner en negrita
                   };
-
+console.log("se encontro el cliente");
             await workbook.xlsx.writeFile("archivo.xlsx");
           } else {
             fallo++;
@@ -202,6 +201,7 @@ async function handleRellenarPlantilla() {
                 color: { argb: "FF0000" }, // Rojo
                 bold: true, // Opcional: poner en negrita
               };
+              console.log("la libranza no es correcta")
               await workbook.xlsx.writeFile("archivo.xlsx");
             }
           }
@@ -212,7 +212,6 @@ async function handleRellenarPlantilla() {
       await workbook.xlsx.writeFile("archivo.xlsx");
     });
   }
-  console.timeEnd("tiempo");
 }
 
 async function handleSearchClient(e, cedula, libranzaEscojida) {
