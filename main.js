@@ -119,6 +119,7 @@ async function handleFileOpen() {
 
 async function handleRellenarPlantilla() {
   const { canceled, filePaths } = await dialog.showOpenDialog();
+  let busco = 0;
   if (!canceled) {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePaths[0]);
@@ -139,15 +140,15 @@ async function handleRellenarPlantilla() {
         );
         let fallo = 0;
         if (dataClient.length == 0) {
-          const cellL = firstSheet.getCell("L" + clientExcel.row); //celda de interes
-          const cellM = firstSheet.getCell("M" + clientExcel.row); //celda de capital
-          cellL.value = "?";
-          cellM.value = "?";
-          cellL.font = {
+          const cellLN = firstSheet.getCell("L" + clientExcel.row); //celda de interes
+          const cellMN = firstSheet.getCell("M" + clientExcel.row); //celda de capital
+          cellLN.value = "?";
+          cellMN.value = "?";
+          cellLN.font = {
             color: { argb: "FF0000" }, // Rojo
             bold: true, // Opcional: poner en negrita
           };
-          cellM.font = {
+          cellMN.font = {
             color: { argb: "FF0000" }, // Rojo
             bold: true, // Opcional: poner en negrita
           };
@@ -158,50 +159,73 @@ async function handleRellenarPlantilla() {
           const client = dataClient[i];
           if (clientExcel.libranza == client.codigo_libranza) {
             fallo = 0;
-            const cellL = firstSheet.getCell("L" + clientExcel.row); //celda de interes
-            const cellM = firstSheet.getCell("M" + clientExcel.row); //celda de capital
+            const cellLSi = firstSheet.getCell("L" + clientExcel.row); //celda de interes
+            const cellMSi = firstSheet.getCell("M" + clientExcel.row); //celda de capital
 
             for (let i = 0; i <= parseInt(dataClient[0].no_cuotas); i++) {
               if (dataTable[i].estado == 0) {
-                cellL.value = Math.abs(
-                  Math.floor(parseFloat(dataTable[i].abono_interes))
+                cellLSi.value =
+                  cellLSi.value +
+                  Math.abs(Math.floor(parseFloat(dataTable[i].abono_interes)));
+                cellMSi.value =
+                  cellMSi.value +
+                  Math.abs(parseInt(dataTable[i].abono_capital));
+                console.log(
+                  "cliente : ",
+                  dataClient[0].nombre,
+                  "celda i",
+                  cellLSi.value,
+                  "celda c",
+                  cellMSi.value,
+                  "cuota",
+                  clientExcel.cuota
                 );
-                cellM.value = Math.abs(parseInt(dataTable[i].abono_capital));
-                i = parseInt(dataClient[0].no_cuotas);
+                if (cellLSi.value + cellMSi.value == clientExcel.cuota) {
+                  console.log("si fue igual", cellLSi.value + cellMSi.value);
+                  busco = 0;
+                  await workbook.xlsx.writeFile("archivo.xlsx");
+                  break;
+                } else {
+                  busco++;
+
+                  if (busco == 2) {
+                    busco = 0;
+                    console.log(
+                      "busco dos veces",
+                      dataClient[0].nombre,
+                      cellLSi.value,
+                      cellMSi.value
+                    );
+                    cellLSi.font = {
+                      color: { argb: "FF0000" }, // Rojo
+                      bold: true, // Opcional: poner en negrita
+                    };
+                    cellMSi.font = {
+                      color: { argb: "FF0000" }, // Rojo
+                      bold: true, // Opcional: poner en negrita
+                    };
+                    await workbook.xlsx.writeFile("archivo.xlsx");
+                    break;
+                  }
+                }
               }
             }
-            cellL.font =
-              cellL.value + cellM.value == clientExcel.cuota
-                ? ""
-                : {
-                    color: { argb: "FF0000" }, // Rojo
-                    bold: true, // Opcional: poner en negrita
-                  };
-            cellM.font =
-              cellL.value + cellM.value == clientExcel.cuota
-                ? ""
-                : {
-                    color: { argb: "FF0000" }, // Rojo
-                    bold: true, // Opcional: poner en negrita
-                  };
-console.log("se encontro el cliente");
-            await workbook.xlsx.writeFile("archivo.xlsx");
           } else {
             fallo++;
             if (fallo == dataClient.length) {
-              const cellL = firstSheet.getCell("L" + clientExcel.row); //celda de interes
-              const cellM = firstSheet.getCell("M" + clientExcel.row); //celda de capital
-              cellL.value = "L";
-              cellM.value = "L";
-              cellL.font = {
+              const cellLF = firstSheet.getCell("L" + clientExcel.row); //celda de interes
+              const cellMF = firstSheet.getCell("M" + clientExcel.row); //celda de capital
+              cellLF.value = "L";
+              cellMF.value = "L";
+              cellLF.font = {
                 color: { argb: "FF0000" }, // Rojo
                 bold: true, // Opcional: poner en negrita
               };
-              cellM.font = {
+              cellMF.font = {
                 color: { argb: "FF0000" }, // Rojo
                 bold: true, // Opcional: poner en negrita
               };
-              console.log("la libranza no es correcta")
+              console.log("la libranza no es correcta");
               await workbook.xlsx.writeFile("archivo.xlsx");
             }
           }
