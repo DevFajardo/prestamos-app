@@ -5,7 +5,10 @@ const ExcelJS = require("exceljs");
 const { guardarCliente } = require("./js/guardarCliente.js");
 const { buscarCliente } = require("./js/buscarCliente.js");
 const { cambiarEstado } = require("./js/cambiarEstado.js");
-
+const accion = {
+  confirmar: 1,
+  revertir: 2,
+};
 let mainWindow;
 
 const readFile = async (excelFile) => {
@@ -120,90 +123,91 @@ async function handleFileOpen() {
 async function handleRellenarPlantilla() {
   const { canceled, filePaths } = await dialog.showOpenDialog();
   let busco = 0;
+
   if (!canceled) {
     const workbook = new ExcelJS.Workbook();
     await workbook.xlsx.readFile(filePaths[0]);
     const firstSheet = workbook.worksheets[0];
-    firstSheet.eachRow(async (row, rowNumber) => {
-      if (rowNumber == 1) return;
-      if (row.values[1] == null) return;
+
+    // Recorremos las filas manualmente
+    for (const [rowIndex, row] of firstSheet
+      .getRows(2, firstSheet.rowCount - 1)
+      .entries()) {
+      if (!row || row.values[1] == null) continue; // Ignorar filas vacías
+
       const clientExcel = {
-        row: rowNumber,
+        row: rowIndex + 2, // Ajusta el número de fila
         cedula: row.values[1],
         libranza: row.values[3],
         cuota: row.values[11],
       };
+
       try {
         const { dataClient, dataTable } = await buscarCliente(
           clientExcel.cedula,
           clientExcel.libranza
         );
         let fallo = 0;
+
         if (dataClient.length == 0) {
-          const cellLN = firstSheet.getCell("L" + clientExcel.row); //celda de interes
-          const cellMN = firstSheet.getCell("M" + clientExcel.row); //celda de capital
+          const cellLN = firstSheet.getCell("L" + clientExcel.row);
+          const cellMN = firstSheet.getCell("M" + clientExcel.row);
           cellLN.value = "?";
           cellMN.value = "?";
-          cellLN.font = {
-            color: { argb: "FF0000" }, // Rojo
-            bold: true, // Opcional: poner en negrita
-          };
-          cellMN.font = {
-            color: { argb: "FF0000" }, // Rojo
-            bold: true, // Opcional: poner en negrita
-          };
-          console.log("no se encontro el cliente");
+          cellLN.font = { color: { argb: "FF0000" }, bold: true };
+          cellMN.font = { color: { argb: "FF0000" }, bold: true };
+          console.log("No se encontró el cliente");
           await workbook.xlsx.writeFile("archivo.xlsx");
+          continue;
         }
+
         for (let i = 0; i < dataClient.length; i++) {
           const client = dataClient[i];
-          if (clientExcel.libranza == client.codigo_libranza) {
+          if (clientExcel.libranza === client.codigo_libranza) {
             fallo = 0;
-            const cellLSi = firstSheet.getCell("L" + clientExcel.row); //celda de interes
-            const cellMSi = firstSheet.getCell("M" + clientExcel.row); //celda de capital
+            const cellLSi = firstSheet.getCell("L" + clientExcel.row);
+            const cellMSi = firstSheet.getCell("M" + clientExcel.row);
 
-            for (let i = 0; i <= parseInt(dataClient[0].no_cuotas); i++) {
-              if (dataTable[i].estado == 0) {
+            for (let j = 0; j <= parseInt(dataClient[0].no_cuotas); j++) {
+              if (dataTable[j].estado == 0) {
                 cellLSi.value =
                   cellLSi.value +
-                  Math.abs(Math.floor(parseFloat(dataTable[i].abono_interes)));
+                  Math.abs(Math.floor(parseFloat(dataTable[j].abono_interes)));
                 cellMSi.value =
                   cellMSi.value +
-                  Math.abs(parseInt(dataTable[i].abono_capital));
+                  Math.abs(parseInt(dataTable[j].abono_capital));
+
                 console.log(
-                  "cliente : ",
+                  "Cliente:",
                   dataClient[0].nombre,
-                  "celda i",
+                  "celda i:",
                   cellLSi.value,
-                  "celda c",
-                  cellMSi.value,
-                  "cuota",
-                  clientExcel.cuota
+                  "celda c:",
+                  cellMSi.value
                 );
-                if (cellLSi.value + cellMSi.value == clientExcel.cuota) {
-                  console.log("si fue igual", cellLSi.value + cellMSi.value);
+
+                if (cellLSi.value + cellMSi.value === clientExcel.cuota) {
+                  console.log("Sí fue igual:", cellLSi.value + cellMSi.value);
                   busco = 0;
+                  await cambiarEstado(
+                    dataTable[j].periodo,
+                    clientExcel.libranza,
+                    1
+                  );
                   await workbook.xlsx.writeFile("archivo.xlsx");
                   break;
                 } else {
                   busco++;
-
                   if (busco == 2) {
                     busco = 0;
                     console.log(
-                      "busco dos veces",
+                      "Busco dos veces",
                       dataClient[0].nombre,
                       cellLSi.value,
                       cellMSi.value
                     );
-                    cellLSi.font = {
-                      color: { argb: "FF0000" }, // Rojo
-                      bold: true, // Opcional: poner en negrita
-                    };
-                    cellMSi.font = {
-                      color: { argb: "FF0000" }, // Rojo
-                      bold: true, // Opcional: poner en negrita
-                    };
+                    cellLSi.font = { color: { argb: "FF0000" }, bold: true };
+                    cellMSi.font = { color: { argb: "FF0000" }, bold: true };
                     await workbook.xlsx.writeFile("archivo.xlsx");
                     break;
                   }
@@ -213,31 +217,31 @@ async function handleRellenarPlantilla() {
           } else {
             fallo++;
             if (fallo == dataClient.length) {
-              const cellLF = firstSheet.getCell("L" + clientExcel.row); //celda de interes
-              const cellMF = firstSheet.getCell("M" + clientExcel.row); //celda de capital
+              const cellLF = firstSheet.getCell("L" + clientExcel.row);
+              const cellMF = firstSheet.getCell("M" + clientExcel.row);
               cellLF.value = "L";
               cellMF.value = "L";
-              cellLF.font = {
-                color: { argb: "FF0000" }, // Rojo
-                bold: true, // Opcional: poner en negrita
-              };
-              cellMF.font = {
-                color: { argb: "FF0000" }, // Rojo
-                bold: true, // Opcional: poner en negrita
-              };
-              console.log("la libranza no es correcta");
+              cellLF.font = { color: { argb: "FF0000" }, bold: true };
+              cellMF.font = { color: { argb: "FF0000" }, bold: true };
+              console.log("La libranza no es correcta");
               await workbook.xlsx.writeFile("archivo.xlsx");
             }
           }
         }
       } catch (error) {
-        console.log("error: ", error);
+        console.log("Error:", error);
       }
-      await workbook.xlsx.writeFile("archivo.xlsx");
-    });
-  }
-}
 
+      await workbook.xlsx.writeFile("archivo.xlsx");
+    }
+
+    // Retornar 1 cuando finalice todo
+    return 1;
+  }
+
+  // Retornar 0 si se canceló el diálogo
+  return 0;
+}
 async function handleSearchClient(e, cedula, libranzaEscojida) {
   const { dataClient, dataTable } = await buscarCliente(
     cedula,
@@ -250,6 +254,7 @@ async function handleCambiarEstado(e, periodo, libranza, accion) {
 }
 const handleCambiarRuta = (file) => {
   mainWindow.loadFile(file);
+  mainWindow.webContents.openDevTools();
 };
 
 function createWindow() {
@@ -275,13 +280,14 @@ function createWindow() {
   ipcMain.on("estado", handleCambiarEstado);
 
   mainWindow.loadFile("./html/index.html");
+  mainWindow.webContents.openDevTools();
   /* setMainMenu(mainWindow); */
 }
 
 app.whenReady().then(() => {
   ipcMain.handle("dialog:openFile", handleFileOpen);
   ipcMain.handle("dialog:rellenarPlantilla", async () => {
-    const fillData = await handleRellenarPlantilla();
+    return await handleRellenarPlantilla();
   });
   ipcMain.handle("searchCedula", handleSearchClient);
   createWindow();

@@ -7,7 +7,7 @@ const showNotificacion = (title, body) => {
 };
 
 //funcion para cambiar el estado de pago de las cuotas mensuales por medio del periodo para saber cual periodo pago, libranza para verificar que usuario pago y accion para saber si va a confirmar el pago o revertirlo
-const cambiarEstado = (periodo, libranza, accion) => {
+const cambiarEstado = async (periodo, libranza, accion) => {
   //sql para cambiar estado con un ternario para validar si se desea confirmar o revertir el pago
   const sql =
     accion == 1

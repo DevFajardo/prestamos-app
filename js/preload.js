@@ -2,7 +2,9 @@ const { contextBridge, ipcRenderer } = require("electron/renderer");
 
 contextBridge.exposeInMainWorld("excelAPI", {
   openFile: () => ipcRenderer.invoke("dialog:openFile"),
-  rellenarPlantilla: () => ipcRenderer.invoke("dialog:rellenarPlantilla"),
+  rellenarPlantilla: async () => {
+    return await ipcRenderer.invoke("dialog:rellenarPlantilla");
+  },
   searchCedula: (cedula, libranzaEscojida) =>
     ipcRenderer.invoke("searchCedula", cedula, libranzaEscojida),
   cambiarRuta: (file) => ipcRenderer.send("cambiarRuta", file),
